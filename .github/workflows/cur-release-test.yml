@@ -1,0 +1,11 @@
+on:
+  release:
+    type: [created]
+steps:
+  a:
+    runs-on: ubuntu-latest
+    steps:
+      - if: github.event_name == "release"
+        env:
+          WEBHOOK_PAYLOAD: ${{ toJSON(github.event) }}
+        run: echo "${{ env.WEBHOOK_PAYLOAD }}"
