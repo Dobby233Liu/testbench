@@ -1,4 +1,4 @@
-on: [workflow_dispatch]
+on: [push, workflow_dispatch]
 jobs:
   aa:
     runs-on: windows-latest
@@ -6,5 +6,6 @@ jobs:
       - run: |
           curl -o a.tar.xz "https://osdn.net/frs/g_redir.php?m=osdn&f=mingw%2Fgcc-core-9.2.0-3-mingw32-bin.tar.xz"
           curl -o aa.tar.xz "https://osdn.net/frs/g_redir.php?m=osdn&f=mingw%2Fgcc-c%2B%2B-9.2.0-3-mingw32-bin.tar.xz"
+          dir a.tar.xz
         shell: cmd
         working-directory: ${{ runner.temp }}
