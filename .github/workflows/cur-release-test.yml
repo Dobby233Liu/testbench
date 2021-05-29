@@ -1,7 +1,7 @@
 on:
   release:
     type: [created]
-steps:
+jobs:
   a:
     runs-on: ubuntu-latest
     steps:
