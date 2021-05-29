@@ -3,9 +3,22 @@ jobs:
   aa:
     runs-on: windows-latest
     steps:
+      - uses: actions/cache@v2
+        with:
+          key: gcc-9.2.0-3-mingw32
+          path: C:\mingw32
+        id: cache-gcc
       - run: |
           curl -o a.tar.xz -L -s "https://osdn.net/projects/mingw/downloads/72217/gcc-core-9.2.0-3-mingw32-bin.tar.xz"
           curl -o aa.tar.xz -L -s "https://osdn.net/projects/mingw/downloads/72211/gcc-c++-9.2.0-3-mingw32-bin.tar.xz"
-          dir a.tar.xz
+          7z x a.tar.xz -oC:\mingw32 -y -aoa -bb0 -bso0
+          7z x aa.tar.xz -oC:\mingw32 -y -aoa -bb0 -bso0
+          dir /w C:\mingw32
         shell: cmd
         working-directory: ${{ runner.temp }}
+        if: steps.cache-gcc.outputs.cache-hit != "true"
+      - run: echo C:\mingw32\bin>> %GITHUB_PATH%
+        shell: cmd
+      - run: |
+          where gcc
+          where g++
