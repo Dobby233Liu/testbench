@@ -41,7 +41,7 @@ jobs:
           with open("CHANGELOG.md", "w", encoding="utf-8") as desc:
             with open("CHANGELOG", "r", encoding="utf-8") as changelog:
               def line_iterator(f):
-                line = ""
+                line = True
                 while line:
                   line = f.readline()
                   yield line
@@ -51,6 +51,7 @@ jobs:
                 counter += 1
                 if counter >= 4:
                   break
+                print("Line %i" % counter)
                 print(line)
         shell: python
       - name: Create Release
