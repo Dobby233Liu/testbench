@@ -30,13 +30,29 @@ jobs:
           echo "#include \"include/build_timestamp.h\"">>a.c
           echo "#include \"vs2015/config_package.h\"">>a.c
           echo "int main(){">>a.c
-          echo "printf(\"::set-output name=version::\" VERSION);">>a.c
-          echo "printf(\"::set-output name=timestamp::\" UPDATED_STR);">>a.c
+          echo "printf(\"::set-output name=version::\" VERSION "\n");">>a.c
+          echo "printf(\"::set-output name=timestamp::\" UPDATED_STR "\n");">>a.c
           echo "return 0;">>a.c
           echo "}">>a.c
           gcc -o version a.c
           ./version
       - run: echo "DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}"
+      - run: |
+          with open("CHANGELOG.md", "w", encoding="utf-8") as desc:
+            with open("CHANGELOG", "r", encoding="utf-8") as changelog:
+              def line_iterator(f):
+                line = ""
+                while line:
+                  line = f.readline()
+                  yield line
+                return
+              counter = 0
+              for line in line_iterator(f):
+                counter += 1
+                if counter >= 4:
+                  break
+                print(line)
+        shell: python
       - name: Create Release
         # temp delete
         if: github.event_name == 'workflow_dispatch'
