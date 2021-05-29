@@ -1,0 +1,49 @@
+on:
+  #push:
+  #  tags:
+  #    - "dosbox-x-v*"
+  push:
+
+name: Create Release from tag
+
+jobs:
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      #- name: Checkout code
+      #  uses: actions/checkout@v2
+      - name: Get needed files (DELETE IN PRODUCTION)
+        run: |
+          mkdir include
+          cd include
+          wget https://github.com/joncampbell123/dosbox-x/raw/master/include/build_timestamp.h
+          cd ..
+          wget https://github.com/joncampbell123/dosbox-x/raw/master/CHANGELOG
+          mkdir vs2015
+          cd vs2015
+          wget https://github.com/joncampbell123/dosbox-x/raw/master/vs2015/config_package.h
+      - name: Get info from headers
+        id: header
+        run: |
+          echo "#include<stdio.h>">a.c
+          echo "#include \"include/build_timestamp.h\"">>a.c
+          echo "#include \"vs2015/config_package.h\"">>a.c
+          echo "void main(void){">>a.c
+          echo "printf(\"::set-output name=version::%s\", VERSION);">>a.c
+          echo "printf(\"::set-output name=timestamp::%s\", UPDATED_STR);">>a.c
+          echo "}">>a.c
+          gcc -O version a.c
+          ./version
+      - name: Create Release
+        # temp delete
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
