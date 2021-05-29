@@ -30,8 +30,8 @@ jobs:
           echo "#include \"include/build_timestamp.h\"">>a.c
           echo "#include \"vs2015/config_package.h\"">>a.c
           echo "int main(){">>a.c
-          echo "printf(\"::set-output name=version::\" VERSION "\n");">>a.c
-          echo "printf(\"::set-output name=timestamp::\" UPDATED_STR "\n");">>a.c
+          echo "printf(\"::set-output name=version::\" VERSION \"\\n\");">>a.c
+          echo "printf(\"::set-output name=timestamp::\" UPDATED_STR \"\\n\");">>a.c
           echo "return 0;">>a.c
           echo "}">>a.c
           gcc -o version a.c
