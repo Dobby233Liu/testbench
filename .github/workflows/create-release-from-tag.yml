@@ -33,7 +33,8 @@ jobs:
           echo "printf(\"::set-output name=version::%s\", VERSION);">>a.c
           echo "printf(\"::set-output name=timestamp::%s\", UPDATED_STR);">>a.c
           echo "}">>a.c
-          gcc -O version a.c
+
+          gcc -o version a.c
           ./version
       - name: Create Release
         # temp delete
