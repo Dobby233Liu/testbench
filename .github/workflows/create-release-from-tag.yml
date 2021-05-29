@@ -37,8 +37,18 @@ jobs:
           gcc -o version a.c
           ./version
       - run: echo "DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}"
-      - run: |
+      - env:
+          DOSBOX_VERSION: ${{ steps.header.outputs.version }}
+        run: |
+          import os
+          SITE = "https://dosbox-x.com"
+          WIKI_LOC = SITE + "/wiki"
+          CHANGELOG_URL = SITE + "/release-" + os.environ["DOSBOX_VERSION"] + ".html"
+          INSTALL_PAGE = "https://github.com/joncampbell123/dosbox-x/blob/" + os.environ["GITHUB_REF"] + "/INSTALL.md"
+
           with open("CHANGELOG.md", "w", encoding="utf-8") as desc:
+            desc.write("Note: Installation instructions are available from the [INSTALL](%s) page. Also, always check out the [DOSBox-X homepage](%s) for latest updates.\n\n" % (INSTALL_PAGE, SITE))
+            desc.write("You can also see the release notes [here](%s) and the user guide here: [DOSBox-X Wiki](%s)\n\n" % (CHANGELOG_URL, WIKI_LOC))
             with open("CHANGELOG", "r", encoding="utf-8") as changelog:
               def line_iterator(f):
                 line = True
@@ -50,10 +60,10 @@ jobs:
               next(it) # skip version
               for line in it:
                 if line == "\n":
-                  print("end")
                   break
-                print(line)
+                print(line, file=desc, end='')
         shell: python
+      - run: cat CHANGELOG.md
       - name: Create Release
         # temp delete
         if: github.event_name == 'workflow_dispatch'
