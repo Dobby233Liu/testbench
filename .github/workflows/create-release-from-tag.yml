@@ -37,14 +37,17 @@ jobs:
           gcc -o version a.c
           ./version
       - run: echo "DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}"
+      - run: git for-each-ref --format="::set-output name=tag::%(refname:lstrip=2)" ${{ github.ref }}
+        id: tag
       - env:
           DOSBOX_VERSION: ${{ steps.header.outputs.version }}
+          SIMPLE_TAG: ${{ steps.tag.outputs.tag }}
         run: |
           import os
           SITE = "https://dosbox-x.com"
           WIKI_LOC = SITE + "/wiki"
           CHANGELOG_URL = SITE + "/release-" + os.environ["DOSBOX_VERSION"] + ".html"
-          INSTALL_PAGE = "https://github.com/joncampbell123/dosbox-x/blob/" + os.environ["GITHUB_REF"] + "/INSTALL.md"
+          INSTALL_PAGE = "https://github.com/joncampbell123/dosbox-x/blob/" + os.environ["SIMPLE_TAG"] + "/INSTALL.md"
 
           with open("CHANGELOG.md", "w", encoding="utf-8") as desc:
             desc.write("Note: Installation instructions are available from the [INSTALL](%s) page. Also, always check out the [DOSBox-X homepage](%s) for latest updates.\n\n" % (INSTALL_PAGE, SITE))
