@@ -46,12 +46,12 @@ jobs:
                   line = f.readline()
                   yield line
                 return
-              counter = 0
-              for line in line_iterator(changelog):
-                counter += 1
-                if counter >= 4:
+              it = line_iterator(changelog)
+              next(it) # skip version
+              for line in it:
+                if line == "\n":
+                  print("end")
                   break
-                print("Line %i" % counter)
                 print(line)
         shell: python
       - name: Create Release
