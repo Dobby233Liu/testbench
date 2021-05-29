@@ -47,7 +47,7 @@ jobs:
                   yield line
                 return
               counter = 0
-              for line in line_iterator(f):
+              for line in line_iterator(changelog):
                 counter += 1
                 if counter >= 4:
                   break
