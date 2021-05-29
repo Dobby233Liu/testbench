@@ -11,7 +11,9 @@ jobs:
       - run: |
           curl -o a.tar.xz -L -s "https://osdn.net/projects/mingw/downloads/72217/gcc-core-9.2.0-3-mingw32-bin.tar.xz"
           curl -o aa.tar.xz -L -s "https://osdn.net/projects/mingw/downloads/72211/gcc-c++-9.2.0-3-mingw32-bin.tar.xz"
-          7z x a.tar.xz -oC:\mingw32 -y -aoa -bb0 -bso0
+          7z e a.tar.xz -o${{ runner.temp }} -y -aoa -bb0 -bso0
+          7z x a.tar -oC:\mingw32 -y -aoa -bb0 -bso0
+          7z e aa.tar.xz -o${{ runner.temp }} -y -aoa -bb0 -bso0
           7z x aa.tar.xz -oC:\mingw32 -y -aoa -bb0 -bso0
           dir /w C:\mingw32
         shell: cmd
