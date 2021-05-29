@@ -30,13 +30,12 @@ jobs:
           echo "#include \"include/build_timestamp.h\"">>a.c
           echo "#include \"vs2015/config_package.h\"">>a.c
           echo "int main(){">>a.c
-          echo "printf(\"::set-output name=version::%s\", VERSION);">>a.c
-          echo "printf(\"::set-output name=timestamp::%s\", UPDATED_STR);">>a.c
+          echo "printf(\"::set-output name=version::\" VERSION);">>a.c
+          echo "printf(\"::set-output name=timestamp::\" UPDATED_STR);">>a.c
           echo "return 0;">>a.c
           echo "}">>a.c
-          cat a.c
-          #gcc -o version a.c
-          #./version
+          gcc -o version a.c
+          ./version
       - name: Create Release
         # temp delete
         if: github.event_name == 'workflow_dispatch'
