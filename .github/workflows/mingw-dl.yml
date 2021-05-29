@@ -5,7 +5,7 @@ jobs:
     steps:
       - uses: actions/cache@v2
         with:
-          key: gcc-9.2.0-3-mingw32
+          key: gcc-9.2.0-3-mingw32-fex
           path: C:\mingw32
         id: cache-gcc
       - run: |
@@ -24,3 +24,4 @@ jobs:
       - run: |
           where gcc
           where g++
+        shell: cmd
