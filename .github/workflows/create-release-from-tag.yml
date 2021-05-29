@@ -36,6 +36,7 @@ jobs:
           echo "}">>a.c
           gcc -o version a.c
           ./version
+      - run: echo "DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}"
       - name: Create Release
         # temp delete
         if: github.event_name == 'workflow_dispatch'
