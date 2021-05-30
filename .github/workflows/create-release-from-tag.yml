@@ -12,10 +12,6 @@ jobs:
     steps:
       #- name: Checkout
       #  uses: actions/checkout@v2
-      - name: github.event
-        env:
-          THISISIT: ${{ toJSON(github.event) }}
-        run: echo check env tab
       - name: Get needed files (DO NOT USE IN PROD)
         run: |
           mkdir include
@@ -34,13 +30,10 @@ jobs:
           echo "#include \"vs2015/config_package.h\"">>a.c
           echo "int main(){">>a.c
           echo "printf(\"::set-output name=version::\" VERSION \"\\n\");">>a.c
-          echo "printf(\"::set-output name=timestamp::\" UPDATED_STR \"\\n\");">>a.c
           echo "return 0;">>a.c
           echo "}">>a.c
           gcc -o version a.c
           ./version
-      - run: echo "DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}"
-        name: Check release name
       - env:
           DOSBOX_VERSION: ${{ steps.header.outputs.version }}
           SIMPLE_TAG: ${{ github.sha }}
@@ -79,10 +72,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}
+          release_name: DOSBox-X ${{ steps.header.outputs.version }} ${{ github.event.head_commit.timestamp }}
           body_path: CHANGELOG.md
           draft: false
           prerelease: false
+      # FIXME: is it needed?
       - name: Update existing release if already exists
         uses: tubone24/update_release@master
         if: steps.release.outcome == 'failure'
@@ -90,5 +84,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}
+          release_name: DOSBox-X ${{ steps.header.outputs.version }} ${{ github.event.head_commit.timestamp }}
           body_path: CHANGELOG.md
