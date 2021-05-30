@@ -60,7 +60,7 @@ jobs:
               it = line_iterator(changelog)
               next(it) # skip version
               for line in it:
-                if line == "\n":
+                if line == "\r\n" or not line.startswith("  "):
                   break
                 print(line, file=desc, end='')
         shell: python
