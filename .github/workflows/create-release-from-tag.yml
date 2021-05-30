@@ -37,11 +37,9 @@ jobs:
           gcc -o version a.c
           ./version
       - run: echo "DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}"
-      - run: git for-each-ref --format="::set-output name=tag::%(refname:lstrip=2)" ${{ github.ref }}
-        id: tag
       - env:
           DOSBOX_VERSION: ${{ steps.header.outputs.version }}
-          SIMPLE_TAG: ${{ steps.tag.outputs.tag }}
+          SIMPLE_TAG: ${{ github.sha }}
         run: |
           import os
           SITE = "https://dosbox-x.com"
