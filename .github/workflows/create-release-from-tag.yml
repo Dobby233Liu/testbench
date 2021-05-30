@@ -12,6 +12,10 @@ jobs:
     steps:
       #- name: Checkout
       #  uses: actions/checkout@v2
+      - name: github.event
+        env:
+          THISISIT: ${{ toJSON(github.event) }}
+        run: echo check env tab
       - name: Get needed files (DO NOT USE IN PROD)
         run: |
           mkdir include
