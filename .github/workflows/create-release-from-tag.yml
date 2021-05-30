@@ -14,10 +14,6 @@ jobs:
       #  uses: actions/checkout@v2
       - name: Get needed files (DO NOT USE IN PROD)
         run: |
-          mkdir include
-          cd include
-          wget https://github.com/joncampbell123/dosbox-x/raw/master/include/build_timestamp.h
-          cd ..
           wget https://github.com/joncampbell123/dosbox-x/raw/master/CHANGELOG
           mkdir vs2015
           cd vs2015
@@ -26,7 +22,6 @@ jobs:
         id: header
         run: |
           echo "#include<stdio.h>">a.c
-          echo "#include \"include/build_timestamp.h\"">>a.c
           echo "#include \"vs2015/config_package.h\"">>a.c
           echo "int main(){">>a.c
           echo "printf(\"::set-output name=version::\" VERSION \"\\n\");">>a.c
