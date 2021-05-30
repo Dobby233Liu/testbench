@@ -1,8 +1,7 @@
 on:
-  #push:
-  #  tags:
-  #    - "dosbox-x-v*"
   push:
+    tags:
+      - "dosbox-x-v*"
 
 name: Create Release from tag
 
@@ -11,7 +10,7 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
-      #- name: Checkout code
+      #- name: Checkout
       #  uses: actions/checkout@v2
       - name: Get needed files (DELETE IN PRODUCTION)
         run: |
@@ -23,7 +22,7 @@ jobs:
           mkdir vs2015
           cd vs2015
           wget https://github.com/joncampbell123/dosbox-x/raw/master/vs2015/config_package.h
-      - name: Get info from headers
+      - name: Generate release name from headers
         id: header
         run: |
           echo "#include<stdio.h>">a.c
@@ -37,6 +36,7 @@ jobs:
           gcc -o version a.c
           ./version
       - run: echo "DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}"
+        name: Check release name
       - env:
           DOSBOX_VERSION: ${{ steps.header.outputs.version }}
           SIMPLE_TAG: ${{ github.sha }}
@@ -63,11 +63,11 @@ jobs:
                 if line == "\r\n" or not line.startswith("  "):
                   break
                 print(line, file=desc, end='')
+        name: Generate release body
         shell: python
       - run: cat CHANGELOG.md
+        name: Check release body
       - name: Create Release
-        # temp delete
-        if: github.event_name == 'workflow_dispatch'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
