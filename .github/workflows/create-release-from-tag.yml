@@ -67,8 +67,10 @@ jobs:
         shell: python
       - run: cat CHANGELOG.md
         name: Check release body
-      - name: Create Release
-        uses: actions/create-release@v1
+      - name: Create or update Release
+        id: release
+        continue-on-error: true
+        uses: actions/create-release@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -77,3 +79,11 @@ jobs:
           body_path: CHANGELOG.md
           draft: false
           prerelease: false
+      - name: Update existing release if already exists
+        uses: tubone24/update_release@master
+        if: steps.release.outcome == 'failure'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_name: DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}
+          body_path: CHANGELOG.md
