@@ -12,7 +12,7 @@ jobs:
     steps:
       #- name: Checkout
       #  uses: actions/checkout@v2
-      - name: Get needed files (DELETE IN PRODUCTION)
+      - name: Get needed files (DO NOT USE IN PROD)
         run: |
           mkdir include
           cd include
@@ -67,7 +67,7 @@ jobs:
         shell: python
       - run: cat CHANGELOG.md
         name: Check release body
-      - name: Create or update Release
+      - name: Create Release
         id: release
         continue-on-error: true
         uses: actions/create-release@master
@@ -85,5 +85,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag_name: ${{ github.ref }}
           release_name: DOSBox-X ${{ steps.header.outputs.version }} ${{ steps.header.outputs.timestamp }}
           body_path: CHANGELOG.md
