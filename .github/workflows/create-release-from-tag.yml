@@ -1,7 +1,9 @@
 on:
   push:
     tags:
-      - "dosbox-x-v*"
+      - 'dosbox-x-v*'
+  release:
+    types: [published]
 
 name: Create Release from tag
 
@@ -10,14 +12,14 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
-      #- name: Checkout
-      #  uses: actions/checkout@v2
       - name: Get needed files (DO NOT USE IN PROD)
         run: |
           wget https://github.com/joncampbell123/dosbox-x/raw/master/CHANGELOG
           mkdir vs2015
           cd vs2015
           wget https://github.com/joncampbell123/dosbox-x/raw/master/vs2015/config_package.h
+        
+      # FIXME: evaluate (with) something else
       - name: Generate release name from headers
         id: header
         run: |
@@ -29,18 +31,21 @@ jobs:
           echo "}">>a.c
           gcc -o version a.c
           ./version
+      # FIXME: python
       - env:
           DOSBOX_VERSION: ${{ steps.header.outputs.version }}
-          SIMPLE_TAG: ${{ github.sha }}
+          # NTS: INSTALL.md is ONLY updated after release, so hardcode master
+          SIMPLE_TAG: master
         run: |
           import os
+          
           SITE = "https://dosbox-x.com"
           WIKI_LOC = SITE + "/wiki"
           CHANGELOG_URL = SITE + "/release-" + os.environ["DOSBOX_VERSION"] + ".html"
           INSTALL_PAGE = "https://github.com/joncampbell123/dosbox-x/blob/" + os.environ["SIMPLE_TAG"] + "/INSTALL.md"
 
           with open("CHANGELOG.md", "w", encoding="utf-8") as desc:
-            desc.write("Note: Installation instructions are available from the [INSTALL](%s) page. Also, always check out the [DOSBox-X homepage](%s) for latest updates.\n\n" % (INSTALL_PAGE, SITE))
+            desc.write("**Please read the [INSTALL](%s) page for more information about installing DOSBox-X on your system.** Also, always check out the [DOSBox-X homepage](%s) for latest updates.\n\n" % (INSTALL_PAGE, SITE))
             desc.write("You can also see the release notes [here](%s) and the user guide here: [DOSBox-X Wiki](%s)\n\n" % (CHANGELOG_URL, WIKI_LOC))
             with open("CHANGELOG", "r", encoding="utf-8") as changelog:
               def line_iterator(f):
@@ -54,30 +59,37 @@ jobs:
               for line in it:
                 if line == "\r\n" or not line.startswith("  "):
                   break
+                line = line.strip()
+                if not line.startswith('-'):
+                  desc.seek(desc.tell() - 1, os.SEEK_SET) # assuming last character is \n
+                  desc.truncate()
+                  print(" ", file=desc, end='')
+                else:
+                  print("", file=desc, end='\n')
                 print(line, file=desc, end='')
         name: Generate release body
         shell: python
-      - run: cat CHANGELOG.md
-        name: Check release body
+      - name: Output proper tag name
+        id: tag
+        shell: python
+        run: |
+          import os
+          x = os.environ["GITHUB_REF"]
+          if x.startswith("refs/tags/"):
+            x = x[len("refs/tags/"):]
+          print("::set-output name=tag::%s" % x)
+        
       - name: Create Release
-        id: release
+        uses: ncipollo/release-action@v1.8.6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.tag.outputs.tag }}
+          commit: ${{ github.sha }}
+          allowUpdates: true
+          name: DOSBox-X ${{ steps.header.outputs.version }} ${{ github.event.head_commit.timestamp }}
+          bodyFile: CHANGELOG.md
+          replacesArtifacts: false
+      - name: Cancel jobs triggered by tag
+        if: always()
         continue-on-error: true
-        uses: actions/create-release@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: DOSBox-X ${{ steps.header.outputs.version }} ${{ github.event.head_commit.timestamp }}
-          body_path: CHANGELOG.md
-          draft: false
-          prerelease: false
-      # FIXME: is it needed?
-      - name: Update existing release if already exists
-        uses: tubone24/update_release@master
-        if: steps.release.outcome == 'failure'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: DOSBox-X ${{ steps.header.outputs.version }} ${{ github.event.head_commit.timestamp }}
-          body_path: CHANGELOG.md
+        uses: Dobby233Liu/homebrew-actions/cancel-previous-runs@master
