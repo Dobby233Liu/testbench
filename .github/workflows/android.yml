@@ -1,0 +1,107 @@
+name: Build Ren'Py project for Android
+
+on: [push, workflow_dispatch]
+
+env:
+  RENPY_VERSION: 7.4.6
+  KEY_CN: renpy-sdk
+
+jobs:
+  android:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: Dobby233Liu/renpy-SideProj
+          
+      - uses: actions/setup-java@v2
+        with:
+          distribution: adopt
+          java-version: 8
+      - name: Setup more
+        run: apt-get install --yes bzip2 wget libxext6 libllvm6.0 mesa-utils
+      - name: Setup Ren'Py SDK
+        run: |
+          sdk_name=renpy-${{ env.RENPY_VERSION }}
+          wget -q https://www.renpy.org/dl/${{ env.RENPY_VERSION }}/${sdk_name}-sdk.tar.bz2
+          tar -xf ./${sdk_name}-sdk.tar.bz2
+          rm ./${sdk_name}-sdk.tar.bz2
+          cd ./${sdk_name}-sdk
+          wget -q https://www.renpy.org/dl/${{ env.RENPY_VERSION }}/${sdk_name}-rapt.zip
+          unzip ./${sdk_name}-rapt.zip
+          rm ./${sdk_name}-rapt.zip
+      - name: Setup RAPT (part 1)
+        working-directory: renpy-${{ env.RENPY_VERSION }}-sdk/rapt
+        id: a
+        run: |
+          pwd=$(pwd)
+          echo "::set-output name=a::$pwd"
+          # sdkmanager --update | yes
+          # sdkmanager --licenses | yes
+          # sdkmanager "platforms;android-29" "platform-tools" | yes
+          echo "$ANDROID_SDK_ROOT" > sdk.txt
+          keytool -genkey -keystore android.keystore -alias android -keyalg RSA -keysize 2048 -keypass android -storepass android -dname CN=${{ env.KEY_CN }} -validity 20000
+      - name: Setup RAPT (part 2)
+        working-directory: renpy-${{ env.RENPY_VERSION }}-sdk/rapt
+        env:
+          AAAA: ${{ steps.a.outputs.a }}
+        shell: python2.7
+        run: |
+          import os, sys
+          
+          basepath = os.environ["AAAA"]
+          sys.path.insert(0, os.path.join(basepath, 'buildlib'))
+          import rapt
+          import rapt.build
+          import rapt.plat
+          rapt.plat.renpy = True
+          local_properties = os.path.join(basepath, "project/local.properties")
+          
+          def set_property(key, value, replace=False):
+            lines = [ ]
+            try:
+              with open(local_properties, "r") as f:
+                for l in f:
+                  k = l.partition("=")[0].strip()
+                  if k == key:
+                      if not replace:
+                          return
+                      else:
+                          continue
+                  lines.append(l)
+            except:
+              pass
+
+            with open(local_properties, "w") as f:
+                for l in lines:
+                    f.write(l)
+
+                f.write("{}={}\n".format(key, value))
+
+          def get_property(key):
+              with open(local_properties, "r") as f:
+                  for l in f:
+                      k, _, v = l.partition("=")
+                      if k.strip() == key:
+                          return v.strip()
+              return None
+
+          rapt.build.copy_project(False)
+          set_property("key.alias", "android")
+          set_property("key.store.password", "android")
+          set_property("key.alias.password", "android")
+          set_property("key.store", os.path.join(basepath, "android.keystore"))
+          set_property("sdk.dir", os.environ["ANDROID_SDK_ROOT"], replace=True)
+
+      - name: Build
+        working-directory: renpy-${{ env.RENPY_VERSION }}-sdk
+        run: |
+          mkdir -p ${{ github.workspace }}/build
+          ./renpy.sh android_build ${{ github.workspace }} assembleRelease --dest ${{ github.workspace }}/build
+          
+      - name: 上传生成的 zip 到 GitHub Actions
+        uses: actions/upload-artifact@v1
+        with:
+          name: EscapeFulafu-android
+          path: build
