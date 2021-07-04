@@ -28,8 +28,8 @@ jobs:
           tar -xf ./${sdk_name}-sdk.tar.bz2
           rm ./${sdk_name}-sdk.tar.bz2
           cd ./${sdk_name}-sdk
-          echo "$(pwd)/lib/linux-x86_64" > $GITHUB_PATH
-          echo "$(pwd)/lib/python2.7" > $GITHUB_PATH
+          echo "$(pwd)/lib/linux-x86_64" >> $GITHUB_PATH
+          echo "$(pwd)/lib/python2.7" >> $GITHUB_PATH
           wget -q https://www.renpy.org/dl/${{ env.RENPY_VERSION }}/${sdk_name}-rapt.zip
           unzip ./${sdk_name}-rapt.zip
           rm ./${sdk_name}-rapt.zip
@@ -37,7 +37,6 @@ jobs:
         working-directory: renpy-${{ env.RENPY_VERSION }}-sdk/rapt
         id: a
         run: |
-          echo $PATH
           pwd=$(pwd)
           echo "::set-output name=a::$pwd"
           # sdkmanager --update | yes
