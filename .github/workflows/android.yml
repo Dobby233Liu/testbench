@@ -19,6 +19,9 @@ jobs:
         with:
           distribution: adopt
           java-version: 8
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '2.x'
       - name: Setup more
         run: sudo apt-get install --yes bzip2 wget libxext6 libllvm6.0 mesa-utils
       - name: Setup Ren'Py SDK
@@ -46,7 +49,7 @@ jobs:
         working-directory: renpy-${{ env.RENPY_VERSION }}-sdk/rapt
         env:
           AAAA: ${{ steps.a.outputs.a }}
-        shell: python27 {0}
+        shell: python
         run: |
           import os, sys
           
