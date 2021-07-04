@@ -52,10 +52,9 @@ jobs:
         shell: python
         run: |
           import os, sys
-          
           basepath = os.environ["AAAA"]
           sys.path.insert(0, os.path.join(basepath, 'buildlib'))
-          sys.path.insert(0, os.path.join(basepath, '../lib/python2.7/pygame_sdl2'))
+          sys.path.insert(0, os.path.join(basepath, '../lib/python2.7'))
           import rapt
           import rapt.build
           import rapt.plat
