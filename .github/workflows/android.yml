@@ -20,7 +20,7 @@ jobs:
           distribution: adopt
           java-version: 8
       - name: Setup more
-        run: apt-get install --yes bzip2 wget libxext6 libllvm6.0 mesa-utils
+        run: sudo apt-get install --yes bzip2 wget libxext6 libllvm6.0 mesa-utils
       - name: Setup Ren'Py SDK
         run: |
           sdk_name=renpy-${{ env.RENPY_VERSION }}
