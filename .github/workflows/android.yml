@@ -39,9 +39,10 @@ jobs:
         run: |
           pwd=$(pwd)
           echo "::set-output name=a::$pwd"
-          # sdkmanager --update | yes
-          # sdkmanager --licenses | yes
-          # sdkmanager "platforms;android-29" "platform-tools" | yes
+          sdkmanager --update | yes
+          sdkmanager --licenses | yes
+          sdkmanager --install "platforms;android-29" "platform-tools" | yes
+          # sdkmanager --install "ndk;21.3.6528147" --channel=3 | yes
           echo "$ANDROID_SDK_ROOT" > sdk.txt
           keytool -genkey -keystore android.keystore -alias android -keyalg RSA -keysize 2048 -keypass android -storepass android -dname CN=${{ env.KEY_CN }} -validity 20000
       - name: Setup RAPT (part 2)
