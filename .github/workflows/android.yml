@@ -39,6 +39,7 @@ jobs:
         run: |
           pwd=$(pwd)
           echo "::set-output name=a::$pwd"
+          alias sdkmanager="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
           sdkmanager --update | yes
           sdkmanager --licenses | yes
           sdkmanager --install "platforms;android-29" "platform-tools" | yes
