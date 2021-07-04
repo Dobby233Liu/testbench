@@ -49,7 +49,7 @@ jobs:
         working-directory: renpy-${{ env.RENPY_VERSION }}-sdk/rapt
         env:
           AAAA: ${{ steps.a.outputs.a }}
-        shell: python
+        shell: ${{ github.workspace }}/renpy-${{ env.RENPY_VERSION }}-sdk/lib/linux-x86_64/python {0}
         run: |
           import os, sys
           basepath = os.environ["AAAA"]
