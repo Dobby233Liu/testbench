@@ -19,9 +19,6 @@ jobs:
         with:
           distribution: adopt
           java-version: 8
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '2.x'
       - name: Setup more
         run: sudo apt-get install --yes bzip2 wget libxext6 libllvm6.0 mesa-utils
       - name: Setup Ren'Py SDK
@@ -31,6 +28,8 @@ jobs:
           tar -xf ./${sdk_name}-sdk.tar.bz2
           rm ./${sdk_name}-sdk.tar.bz2
           cd ./${sdk_name}-sdk
+          echo "$(pwd)/lib/linux-x86_64" > $GITHUB_PATH
+          echo "$(pwd)/lib/python2.7" > $GITHUB_PATH
           wget -q https://www.renpy.org/dl/${{ env.RENPY_VERSION }}/${sdk_name}-rapt.zip
           unzip ./${sdk_name}-rapt.zip
           rm ./${sdk_name}-rapt.zip
@@ -54,7 +53,7 @@ jobs:
           import os, sys
           basepath = os.environ["AAAA"]
           sys.path.insert(0, os.path.join(basepath, 'buildlib'))
-          sys.path.insert(0, os.path.join(os.environ["GITHUB_WORKSPACE"], "renpy-%s-sdk/" % os.environ["RENPY_VERSION"], 'lib/python2.7'))
+          #sys.path.insert(0, os.path.join(os.environ["GITHUB_WORKSPACE"], "renpy-%s-sdk/" % os.environ["RENPY_VERSION"], 'lib/python2.7'))
           reload(sys)
           print(sys.path)
           import rapt
