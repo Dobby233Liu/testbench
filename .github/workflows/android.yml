@@ -57,8 +57,7 @@ jobs:
         run: |
           import os, sys
 
-          basepath = os.getcwd()
-          sys.path.insert(0, os.path.join(basepath, 'buildlib'))
+          sys.path.insert(0, 'buildlib')
 
           import rapt
           import rapt.build
@@ -88,7 +87,7 @@ jobs:
           rapt.install_sdk.set_property("key.alias", "android")
           rapt.install_sdk.set_property("key.store.password", "android")
           rapt.install_sdk.set_property("key.alias.password", "android")
-          rapt.install_sdk.set_property("key.store", os.path.join(basepath, "android.keystore"))
+          rapt.install_sdk.set_property("key.store", rapt.plat.path("android.keystore"))
           rapt.install_sdk.set_property("sdk.dir", os.environ["ANDROID_SDK_ROOT"], replace=True)
 
       - name: Install Android SDK
@@ -122,21 +121,12 @@ jobs:
         with:
           name: ${{ steps.apk.outputs.filename }}
           path: build/${{ steps.apk.outputs.filename }}
-      - name: Upload apks as release assets
-        uses: actions/github-script@v4
-        env:
-          UPLOAD_URL: ${{ github.event.release.upload_url }}
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        if: github.event_name == 'release'
         with:
-          script: |
-            const fs = require('fs').promises;
-            for (const file of await fs.readdir('./build')) {
-              console.log('Uploading file', file + '...');
-              const flen = await fs.stat(`./build/${file}`).size;
-              const conf = { 'content-type': 'application/vnd.android.package-archive', 'content-length': flen };
-              await github.repos.uploadReleaseAsset({
-                process.env.UPLOAD_URL,
-                conf,
-                name: file,
-                file: await fs.readFile(`./build/${file}`),
-              });
-            }
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/*
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
