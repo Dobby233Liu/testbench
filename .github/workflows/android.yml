@@ -46,7 +46,7 @@ jobs:
         working-directory: renpy-${{ env.RENPY_VERSION }}-sdk/rapt
         env:
           AAAA: ${{ steps.a.outputs.a }}
-        shell: python2.7
+        shell: python27 {0}
         run: |
           import os, sys
           
