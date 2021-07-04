@@ -23,6 +23,7 @@ jobs:
         run: sudo apt-get install --yes bzip2 wget libxext6 libllvm6.0 mesa-utils
 
       - name: Setup Ren'Py SDK
+        working-directory: ..
         run: |
           sdk_name=renpy-${{ env.RENPY_VERSION }}
           wget -q https://www.renpy.org/dl/${{ env.RENPY_VERSION }}/${sdk_name}-sdk.tar.bz2
@@ -33,16 +34,16 @@ jobs:
           unzip -q ./${sdk_name}-rapt.zip
           rm ./${sdk_name}-rapt.zip
       - name: Setup RAPT (part 1)
-        working-directory: renpy-${{ env.RENPY_VERSION }}-sdk/rapt
+        working-directory: ../renpy-${{ env.RENPY_VERSION }}-sdk/rapt
         run: 
           keytool -genkey -keystore android.keystore -alias android -keyalg RSA -keysize 2048 -keypass android -storepass android -dname CN=${{ env.KEY_CN }} -validity 20000
       - name: Prepare Python
-        working-directory: renpy-${{ env.RENPY_VERSION }}-sdk
+        working-directory: ../renpy-${{ env.RENPY_VERSION }}-sdk
         run: |
           echo "$(pwd)/lib/linux-x86_64" >> $GITHUB_PATH
           echo "$(pwd)/lib/python2.7" >> $GITHUB_PATH
       - name: Setup RAPT (part 2)
-        working-directory: renpy-${{ env.RENPY_VERSION }}-sdk/rapt
+        working-directory: ../renpy-${{ env.RENPY_VERSION }}-sdk/rapt
         shell: python
         run: |
           import os, sys
@@ -64,6 +65,7 @@ jobs:
           rapt.install_sdk.set_property("sdk.dir", os.environ["ANDROID_SDK_ROOT"], replace=True)
 
       - name: Install Android SDK
+        working-directory: ../renpy-${{ env.RENPY_VERSION }}-sdk/rapt
         run: |
           yes | sudo $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --update
           yes | sudo $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses 1> /dev/null
@@ -73,7 +75,7 @@ jobs:
           echo "$ANDROID_SDK_ROOT" > sdk.txt
 
       - name: Build app
-        working-directory: renpy-${{ env.RENPY_VERSION }}-sdk
+        working-directory: ../renpy-${{ env.RENPY_VERSION }}-sdk
         env:
           SDL_AUDIODRIVER: dummy
           SDL_VIDEODRIVER: dummy
