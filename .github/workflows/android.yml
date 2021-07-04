@@ -32,6 +32,7 @@ jobs:
           unzip -q ./${sdk_name}-rapt.zip
           rm ./${sdk_name}-rapt.zip
       - name: Prepare enviornment
+        working-directory: renpy-${{ env.RENPY_VERSION }}-sdk
         run: |
           echo "$(pwd)/lib/linux-x86_64" >> $GITHUB_PATH
           echo "$(pwd)/lib/python2.7" >> $GITHUB_PATH
