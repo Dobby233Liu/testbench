@@ -34,10 +34,7 @@ jobs:
           rm ./${sdk_name}-rapt.zip
       - name: Setup RAPT (part 1)
         working-directory: renpy-${{ env.RENPY_VERSION }}-sdk/rapt
-        id: a
-        run: |
-          pwd=$(pwd)
-          echo "::set-output name=a::$pwd"
+        run: 
           keytool -genkey -keystore android.keystore -alias android -keyalg RSA -keysize 2048 -keypass android -storepass android -dname CN=${{ env.KEY_CN }} -validity 20000
       - name: Prepare Python
         working-directory: renpy-${{ env.RENPY_VERSION }}-sdk
@@ -46,15 +43,13 @@ jobs:
           echo "$(pwd)/lib/python2.7" >> $GITHUB_PATH
       - name: Setup RAPT (part 2)
         working-directory: renpy-${{ env.RENPY_VERSION }}-sdk/rapt
-        env:
-          AAAA: ${{ steps.a.outputs.a }}
         shell: python
         run: |
           import os, sys
 
-          basepath = os.environ["AAAA"]
-          sys.path.insert(0, os.path.join(basepath, 'buildlib'))
+          basepath = os.getcwd()
 
+          sys.path.insert(0, os.path.join(basepath, 'buildlib'))
           import rapt
           import rapt.build
           import rapt.plat
@@ -86,11 +81,11 @@ jobs:
           mkdir -p ${{ github.workspace }}/build
           ./renpy.sh launcher android_build ${{ github.workspace }} assembleRelease --dest ${{ github.workspace }}/build
 
-      - name: Search upload file
-        id: file
-        run: cd build && echo "::set-output name=n::$(ls *-universal-release.apk)"
+      - name: Search for apk file
+        id: apk
+        run: cd build && echo "::set-output name=filename::$(ls *-universal-release.apk)"
       - name: Upload apk as a artifact
         uses: actions/upload-artifact@v1
         with:
-          name: ${{ steps.file.outputs.n }}
-          path: build/${{ steps.file.outputs.n }}
+          name: ${{ steps.apk.outputs.filename }}
+          path: build/${{ steps.apk.outputs.filename }}
