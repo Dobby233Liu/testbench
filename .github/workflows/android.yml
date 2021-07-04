@@ -1,6 +1,11 @@
 name: Build Ren'Py project for Android
 
-on: [push, workflow_dispatch]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
 
 env:
   RENPY_VERSION: 7.4.6
@@ -22,8 +27,14 @@ jobs:
       - name: Install packages
         run: sudo apt-get install --yes bzip2 wget libxext6 libllvm6.0 mesa-utils
 
+      - uses: actions/cache@v2
+        id: sdk-cache
+        with:
+          key: renpy-sdk-${{ env.RENPY_VERSION }}-v1
+          path: ../renpy-${{ env.RENPY_VERSION }}-sdk
       - name: Setup Ren'Py SDK
         working-directory: ..
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
         run: |
           sdk_name=renpy-${{ env.RENPY_VERSION }}
           wget -q https://www.renpy.org/dl/${{ env.RENPY_VERSION }}/${sdk_name}-sdk.tar.bz2
@@ -33,29 +44,45 @@ jobs:
           wget -q https://www.renpy.org/dl/${{ env.RENPY_VERSION }}/${sdk_name}-rapt.zip
           unzip -q ./${sdk_name}-rapt.zip
           rm ./${sdk_name}-rapt.zip
-      - name: Setup RAPT (part 1)
-        working-directory: ../renpy-${{ env.RENPY_VERSION }}-sdk/rapt
-        run: 
-          keytool -genkey -keystore android.keystore -alias android -keyalg RSA -keysize 2048 -keypass android -storepass android -dname CN=${{ env.KEY_CN }} -validity 20000
       - name: Prepare Python
         working-directory: ../renpy-${{ env.RENPY_VERSION }}-sdk
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
         run: |
           echo "$(pwd)/lib/linux-x86_64" >> $GITHUB_PATH
           echo "$(pwd)/lib/python2.7" >> $GITHUB_PATH
-      - name: Setup RAPT (part 2)
+      - name: Setup RAPT (installsdk.generate_keys)
         working-directory: ../renpy-${{ env.RENPY_VERSION }}-sdk/rapt
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
         shell: python
         run: |
           import os, sys
 
           basepath = os.getcwd()
-
           sys.path.insert(0, os.path.join(basepath, 'buildlib'))
+
           import rapt
           import rapt.build
           import rapt.plat
           import rapt.install_sdk
+          import rapt.interface
           rapt.plat.renpy = True
+
+          interface = rapt.interface.Interface()
+
+          rapt.install_sdk.run(
+              interface,
+              rapt.plat.keytool,
+              "-genkey",
+              "-keystore", "android.keystore",
+              "-alias", "android",
+              "-keyalg", "RSA",
+              "-keysize", "2048",
+              "-keypass", "android",
+              "-storepass", "android",
+              "-dname", "CN=%s" % os.environ["KEY_CN"],
+              "-validity", "20000",
+              use_path=True
+          )
 
           rapt.build.copy_project(False)
           rapt.install_sdk.set_property("key.alias", "android")
@@ -83,10 +110,12 @@ jobs:
           mkdir -p ${{ github.workspace }}/build
           ./renpy.sh launcher android_build ${{ github.workspace }} assembleRelease --dest ${{ github.workspace }}/build
 
-      - name: Search for apk file
+      - name: Search for an apk file
         id: apk
+        if: github.event_name != "release"
         run: cd build && echo "::set-output name=filename::$(ls *-universal-release.apk)"
       - name: Upload apk as a artifact
+        if: github.event_name != "release"
         uses: actions/upload-artifact@v1
         with:
           name: ${{ steps.apk.outputs.filename }}
