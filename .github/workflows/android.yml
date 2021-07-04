@@ -107,8 +107,8 @@ jobs:
           mkdir -p ${{ github.workspace }}/build
           ./renpy.sh launcher android_build ${{ github.workspace }} assembleRelease --dest ${{ github.workspace }}/build
           
-      - name: 上传生成的 zip 到 GitHub Actions
+      - name: 上传 apk as a artifact
         uses: actions/upload-artifact@v1
         with:
           name: EscapeFulafu-android
-          path: build
+          path: build/*-universal-release.apk
