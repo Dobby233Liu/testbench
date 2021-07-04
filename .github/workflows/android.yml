@@ -54,7 +54,7 @@ jobs:
           import os, sys
           basepath = os.environ["AAAA"]
           sys.path.insert(0, os.path.join(basepath, 'buildlib'))
-          sys.path.insert(0, os.path.join(basepath, '../lib/python2.7'))
+          sys.path.insert(0, os.path.join(os.environ["GITHUB_WORKSPACE"], "renpy-%s-sdk/" % os.environ["RENPY_VERSION"], 'lib/python2.7'))
           import rapt
           import rapt.build
           import rapt.plat
