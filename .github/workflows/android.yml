@@ -51,50 +51,22 @@ jobs:
         shell: python
         run: |
           import os, sys
+
           basepath = os.environ["AAAA"]
           sys.path.insert(0, os.path.join(basepath, 'buildlib'))
-          reload(sys)
+
           import rapt
           import rapt.build
           import rapt.plat
+          import rapt.install_sdk
           rapt.plat.renpy = True
-          local_properties = os.path.join(basepath, "project/local.properties")
-          
-          def set_property(key, value, replace=False):
-            lines = [ ]
-            try:
-              with open(local_properties, "r") as f:
-                for l in f:
-                  k = l.partition("=")[0].strip()
-                  if k == key:
-                      if not replace:
-                          return
-                      else:
-                          continue
-                  lines.append(l)
-            except:
-              pass
-
-            with open(local_properties, "w") as f:
-                for l in lines:
-                    f.write(l)
-
-                f.write("{}={}\n".format(key, value))
-
-          def get_property(key):
-              with open(local_properties, "r") as f:
-                  for l in f:
-                      k, _, v = l.partition("=")
-                      if k.strip() == key:
-                          return v.strip()
-              return None
 
           rapt.build.copy_project(False)
-          set_property("key.alias", "android")
-          set_property("key.store.password", "android")
-          set_property("key.alias.password", "android")
-          set_property("key.store", os.path.join(basepath, "android.keystore"))
-          set_property("sdk.dir", os.environ["ANDROID_SDK_ROOT"], replace=True)
+          rapt.install_sdk.set_property("key.alias", "android")
+          rapt.install_sdk.set_property("key.store.password", "android")
+          rapt.install_sdk.set_property("key.alias.password", "android")
+          rapt.install_sdk.set_property("key.store", os.path.join(basepath, "android.keystore"))
+          rapt.install_sdk.set_property("sdk.dir", os.environ["ANDROID_SDK_ROOT"], replace=True)
 
       - name: Install Android SDK
         run: |
@@ -116,7 +88,7 @@ jobs:
 
       - name: Search upload file
         id: file
-        run: echo "::set-output name=n::$(ls build/*-universal-release.apk)"
+        run: cd build && echo "::set-output name=n::$(ls *-universal-release.apk)"
       - name: Upload apk as a artifact
         uses: actions/upload-artifact@v1
         with:
