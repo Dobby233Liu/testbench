@@ -112,10 +112,12 @@ jobs:
 
       - name: Search for an apk file
         id: apk
-        if: github.event_name != "release"
-        run: cd build && echo "::set-output name=filename::$(ls *-universal-release.apk)"
+        if: github.event_name != 'release'
+        run: |
+          cd build
+          echo "::set-output name=filename::$(ls *-universal-release.apk)"
       - name: Upload apk as a artifact
-        if: github.event_name != "release"
+        if: github.event_name != 'release'
         uses: actions/upload-artifact@v1
         with:
           name: ${{ steps.apk.outputs.filename }}
