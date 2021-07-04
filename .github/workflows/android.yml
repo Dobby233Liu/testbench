@@ -55,6 +55,7 @@ jobs:
           
           basepath = os.environ["AAAA"]
           sys.path.insert(0, os.path.join(basepath, 'buildlib'))
+          sys.path.insert(0, os.path.join(basepath, '../module/include'))
           import rapt
           import rapt.build
           import rapt.plat
