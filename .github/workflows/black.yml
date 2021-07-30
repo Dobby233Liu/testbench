@@ -1,0 +1,13 @@
+on: [workflow_dispatch, push]
+
+jobs:
+  a:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - run: wget https://github.com/Dobby233Liu/garfield.csv/raw/main/sanitize.py
+    - run: pip install black
+    - run: python -m black sanitize.py
+    - run: ls && cat sanitize.py
