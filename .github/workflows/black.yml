@@ -9,5 +9,8 @@ jobs:
         python-version: 3.x
     - run: wget https://github.com/Dobby233Liu/garfield.csv/raw/main/sanitize.py
     - run: pip install black
-    - run: python -m black sanitize.py
-    - run: ls && cat sanitize.py
+    - run: python -m black *.py
+    - uses: actions/upload-artifact@v2
+      with:
+        path: *.py
+        name: formatted
