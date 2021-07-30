@@ -7,10 +7,12 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: 3.x
-    - run: wget https://github.com/Dobby233Liu/garfield.csv/raw/main/sanitize.py
+    - uses: actions/checkout@v2
+      with:
+        repository: Dobby233Liu/garfield.csv
     - run: pip install black
-    - run: python -m black *.py
+    - run: "python -m black *.py"
     - uses: actions/upload-artifact@v2
       with:
-        path: *.py
+        path: "*.py"
         name: formatted
