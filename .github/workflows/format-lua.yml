@@ -1,0 +1,13 @@
+on: [workflow_dispatch]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        luarocks install --server=https://luarocks.org/dev luaformatter
+        wget https://file.io/w1cJsMw2LV9l
+        lua-format gameover.lua
+    - uses: actions/upload-artifact@v2
+      with:
+        path: gameover.lua
