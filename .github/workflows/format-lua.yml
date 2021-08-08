@@ -7,7 +7,11 @@ jobs:
     - uses: leafo/gh-actions-lua@v8
     - uses: leafo/gh-actions-luarocks@v4
     - run: |
-        jopts=4 luarocks install --server=https://luarocks.org/dev luaformatter CMAKE="cmake -DCOVERAGE=OFF -DBUILD_TESTS=OFF"
+        git clone --recurse-submodules https://github.com/Koihik/LuaFormatter.git
+        cd LuaFormatter
+        cmake . -DBUILD_TESTS=OFF -DCOVERAGE=OFF
+        make -j8
+        make install
     - run: |
         wget -O gameover.lua https://file.io/29NvkYjOs7Dg
         lua-format -i gameover.lua
